@@ -2,7 +2,11 @@
 
 {% block content %}
 
-<div id="warbler-hero" class="full-width"></div>
+<div id="warbler-hero" class="full-width">
+  {% if user.header_img_url %}
+  <img src="{{ user.header_img_url }}" alt="Header image for {{ user.username }}" class="img-fluid h-100 w-100">
+  {% endif %}
+</div>
 <img src="{{ user.image_url }}" alt="Image for {{ user.username }}" id="profile-avatar">
 <div class="row full-width">
   <div class="container">
@@ -58,8 +62,8 @@
 <div class="row">
   <div class="col-sm-3">
     <h4 id="sidebar-username">@{{ user.username }}</h4>
-    <p>INSERT BIO HERE</p>
-    <p class="user-location"><span class="fa fa-map-marker"></span>None</p>
+    <p>{{ user.bio or '' }}</p>
+    <p class="user-location"><span class="fa fa-map-marker"></span>{{ user.location or ' N/A' }}</p>
   </div>
 
   {% block user_details %}
