@@ -209,6 +209,48 @@ def stop_following(follow_id):
 
     return redirect(f"/users/{g.user.id}/following")
 
+@app.route('/users/<int:user_id>/likes', methods=['GET'])
+def list_likes(user_id):
+    """Displays a list of liked messages."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    likes = [msg.id for msg in g.user.likes]
+
+    return render_template('users/likes.html', user=user, liked_msgs=user.likes, likes=likes)
+
+
+@app.route('/users/add_like/<int:msg_id>', methods=['POST'])
+def add_like(msg_id):
+    """Add a like to user's warble"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    liked_warble = Message.query.get_or_404(msg_id)
+    g.user.likes.append(liked_warble)
+    db.session.commit()
+
+    return redirect("/")
+
+@app.route('/users/remove_like/<int:msg_id>', methods=['POST'])
+def remove_like(msg_id):
+    """Remove a like from user's warble"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    liked_warble = Message.query.get_or_404(msg_id)
+    g.user.likes.remove(liked_warble)
+    db.session.commit()
+
+    return redirect("/")
+
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
@@ -321,6 +363,7 @@ def homepage():
 
     if g.user:
         following = [user.id for user in g.user.following] + [g.user.id]
+        likes = [msg.id for msg in g.user.likes]
         messages = (Message
                     .query
                     .filter(Message.user_id.in_(following))
@@ -328,7 +371,7 @@ def homepage():
                     .limit(100)
                     .all())   
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.html', messages=messages, likes=likes)
 
     else:
         return render_template('home-anon.html')
